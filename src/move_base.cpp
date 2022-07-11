@@ -35,7 +35,7 @@
 * Author: Eitan Marder-Eppstein
 *         Mike Phillips (put the planner in its own thread)
 *********************************************************************/
-#include <move_base/move_base.h>
+#include <move_base_benchmark/move_base.h>
 #include <move_base_msgs/RecoveryStatus.h>
 #include <cmath>
 
