@@ -27,7 +27,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <move_base_benchmark/move_base.h>
+#include "move_base/move_base.h"
 #include <tf2_ros/transform_listener.h>
 
 int main(int argc, char** argv){

@@ -35,9 +35,10 @@
 * Author: Eitan Marder-Eppstein
 *         Mike Phillips (put the planner in its own thread)
 *********************************************************************/
-#include <move_base_benchmark/move_base.h>
+#include "move_base/move_base.h"
 #include <move_base_msgs/RecoveryStatus.h>
 #include <cmath>
+#include <chrono>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/thread.hpp>
@@ -45,6 +46,7 @@
 #include <geometry_msgs/Twist.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2/utils.h>
 
 namespace move_base {
 
@@ -64,6 +66,9 @@ namespace move_base {
     ros::NodeHandle nh;
 
     recovery_trigger_ = PLANNING_R;
+
+    //path to save the recorded data
+    private_nh.param("log_filename", log_filename_, std::string("log.txt"));
 
     //get some parameters that will be global to the move base node
     std::string global_planner, local_planner;
@@ -132,6 +137,9 @@ namespace move_base {
     //create the ros wrapper for the controller's costmap... and initializer a pointer we'll use with the underlying map
     controller_costmap_ros_ = new costmap_2d::Costmap2DROS("local_costmap", tf_);
     controller_costmap_ros_->pause();
+
+    //init the odom helper to receive the robot's velocity from odom messages
+    odom_helper_.setOdomTopic("odom");
 
     //create a local planner
     try {
@@ -681,6 +689,14 @@ namespace move_base {
     last_oscillation_reset_ = ros::Time::now();
     planning_retries_ = 0;
 
+    //open the file to record the navigation data
+    log_file_ = fopen(log_filename_.c_str(), "w+");
+    if (log_file_ == NULL)
+    {
+      ROS_ERROR("Failed to open the log file");
+      return;
+    }
+
     ros::NodeHandle n;
     while(n.ok())
     {
@@ -783,6 +799,9 @@ namespace move_base {
       if(r.cycleTime() > ros::Duration(1 / controller_frequency_) && state_ == CONTROLLING)
         ROS_WARN("Control loop missed its desired rate of %.4fHz... the loop actually took %.4f seconds", controller_frequency_, r.cycleTime().toSec());
     }
+
+    //close the file
+    fclose(log_file_);
 
     //wake up the planner thread so that it can exit cleanly
     lock.lock();
@@ -910,6 +929,25 @@ namespace move_base {
         {
          boost::unique_lock<costmap_2d::Costmap2D::mutex_t> lock(*(controller_costmap_ros_->getCostmap()->getMutex()));
 
+        //get robot pose
+        geometry_msgs::PoseStamped robot_pose;
+        getRobotPose(robot_pose, controller_costmap_ros_);
+
+        //get robot velocity
+        geometry_msgs::PoseStamped robot_vel_tf;
+        odom_helper_.getRobotVel(robot_vel_tf);
+
+        //compute the distance to the closest obstacle
+        double obs_dist = obs_dist_calculator_.compute(controller_costmap_ros_);
+
+        //log navigation data
+        fprintf(log_file_, "%.3f %.3f %.3f %.3f %.3f %.3f %.3f ", ros::WallTime::now().toSec(),
+                robot_pose.pose.position.x, robot_pose.pose.position.y, tf2::getYaw(robot_pose.pose.orientation),
+                robot_vel_tf.pose.position.x, tf2::getYaw(robot_vel_tf.pose.orientation), obs_dist);
+
+        //start timing
+        const auto start_t = std::chrono::high_resolution_clock::now();
+
         if(tc_->computeVelocityCommands(cmd_vel)){
           ROS_DEBUG_NAMED( "move_base", "Got a valid command from the local planner: %.3lf, %.3lf, %.3lf",
                            cmd_vel.linear.x, cmd_vel.linear.y, cmd_vel.angular.z );
@@ -944,6 +982,11 @@ namespace move_base {
             lock.unlock();
           }
         }
+
+        //end timing
+        const auto end_t = std::chrono::high_resolution_clock::now();
+        const std::chrono::duration<double> time_diff = end_t - start_t;
+        fprintf(log_file_, "%.3f\n", time_diff.count());
         }
 
         break;
