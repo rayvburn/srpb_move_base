@@ -67,9 +67,6 @@ namespace move_base {
 
     recovery_trigger_ = PLANNING_R;
 
-    //path to save the recorded data
-    private_nh.param("log_filename", log_filename_, std::string("log.txt"));
-
     //get some parameters that will be global to the move base node
     std::string global_planner, local_planner;
     private_nh.param("base_global_planner", global_planner, std::string("navfn/NavfnROS"));
@@ -137,6 +134,9 @@ namespace move_base {
     //create the ros wrapper for the controller's costmap... and initializer a pointer we'll use with the underlying map
     controller_costmap_ros_ = new costmap_2d::Costmap2DROS("local_costmap", tf_);
     controller_costmap_ros_->pause();
+
+    //benchmarking
+    robot_logger_.init(private_nh);
 
     //init the odom helper to receive the robot's velocity from odom messages
     odom_helper_.setOdomTopic("odom");
@@ -689,13 +689,7 @@ namespace move_base {
     last_oscillation_reset_ = ros::Time::now();
     planning_retries_ = 0;
 
-    //open the file to record the navigation data
-    log_file_ = fopen(log_filename_.c_str(), "w+");
-    if (log_file_ == NULL)
-    {
-      ROS_ERROR("Failed to open the log file");
-      return;
-    }
+    robot_logger_.start();
 
     ros::NodeHandle n;
     while(n.ok())
@@ -800,8 +794,7 @@ namespace move_base {
         ROS_WARN("Control loop missed its desired rate of %.4fHz... the loop actually took %.4f seconds", controller_frequency_, r.cycleTime().toSec());
     }
 
-    //close the file
-    fclose(log_file_);
+    robot_logger_.finish();
 
     //wake up the planner thread so that it can exit cleanly
     lock.lock();
@@ -941,9 +934,7 @@ namespace move_base {
         double obs_dist = obs_dist_calculator_.compute(controller_costmap_ros_);
 
         //log navigation data
-        fprintf(log_file_, "%.3f %.3f %.3f %.3f %.3f %.3f %.3f ", ros::WallTime::now().toSec(),
-                robot_pose.pose.position.x, robot_pose.pose.position.y, tf2::getYaw(robot_pose.pose.orientation),
-                robot_vel_tf.pose.position.x, tf2::getYaw(robot_vel_tf.pose.orientation), obs_dist);
+        robot_logger_.update(ros::WallTime::now().toSec(), robot_pose, robot_vel_tf, obs_dist);
 
         //start timing
         const auto start_t = std::chrono::high_resolution_clock::now();
@@ -986,7 +977,7 @@ namespace move_base {
         //end timing
         const auto end_t = std::chrono::high_resolution_clock::now();
         const std::chrono::duration<double> time_diff = end_t - start_t;
-        fprintf(log_file_, "%.3f\n", time_diff.count());
+        robot_logger_.update(time_diff.count());
         }
 
         break;
