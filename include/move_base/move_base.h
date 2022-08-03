@@ -59,7 +59,10 @@
 #include <dynamic_reconfigure/server.h>
 #include <base_local_planner/odometry_helper_ros.h>
 #include "move_base/MoveBaseConfig.h"
-#include "move_base/obs_dist_calculator.h"
+
+#include <srpb_tooling/obs_dist_calculator.h>
+#include <srpb_logger/robot_logger.h>
+#include <srpb_logger/people_logger.h>
 
 namespace move_base {
   //typedefs to help us out with the action server so that we don't hace to type so much
@@ -238,8 +241,8 @@ namespace move_base {
 
       //helper to log the navigation data
       ObsDistCalculator obs_dist_calculator_;
-      FILE* log_file_;
-      std::string log_filename_;
+      RobotLogger robot_logger_;
+      PeopleLogger people_logger_;
       base_local_planner::OdometryHelperRos odom_helper_;
   };
 };

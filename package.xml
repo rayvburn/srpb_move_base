@@ -37,6 +37,9 @@
     <depend>tf2_ros</depend>
     <depend>visualization_msgs</depend>
 
+    <depend>srpb_logger</depend>
+    <depend>srpb_tooling</depend>
+
     <!--These deps aren't strictly needed, but given the default parameters require them to work, we'll enforce that they build -->
     <depend>base_local_planner</depend>
     <depend>clear_costmap_recovery</depend>

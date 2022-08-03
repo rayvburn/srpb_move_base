@@ -22,12 +22,23 @@ find_package(catkin REQUIRED
         std_srvs
         tf2_geometry_msgs
         tf2_ros
+        srpb_logger
+        srpb_tooling
 )
 find_package(Eigen3 REQUIRED)
 add_definitions(${EIGEN3_DEFINITIONS})
 
-# Benchmark
-find_package(Ceres REQUIRED)
+# FIXME::
+# OpenCV dependency is inherited from `srpb_tooling` package however there is some linking issue. Error is:
+#
+# Errors     << move_base_benchmark:make <WS>/logs/move_base_benchmark/build.make.034.log
+# /usr/bin/ld: CMakeFiles/move_base_benchmark_node.dir/src/move_base_node.cpp.o: undefined reference to symbol
+# '_ZN2cv6String10deallocateEv'
+# /usr/lib/x86_64-linux-gnu/libopencv_core.so.3.2: error adding symbols: DSO missing from command line
+# collect2: error: ld returned 1 exit status
+#
+# ${srpb_tooling_LIBRARIES} does not show `opencv` libraries indeed
+#
 find_package(OpenCV REQUIRED)
 
 # dynamic reconfigure
@@ -46,26 +57,29 @@ catkin_package(
         move_base_msgs
         nav_msgs
         roscpp
+        srpb_logger
+        srpb_tooling
 )
 
 include_directories(
     include
     ${catkin_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIRS}
-    ${CERES_INCLUDE_DIRS}
-    ${OpenCV_INCLUDE_DIRS}
+    ${srpb_logger_INCLUDE_DIRS}
+    ${srpb_tooling_INCLUDE_DIRS}
 )
 
 # move_base
 add_library(move_base_benchmark
   src/move_base.cpp
-  src/obs_dist_calculator.cpp
 )
 target_link_libraries(move_base_benchmark
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
-    ${CERES_LIBRARIES}
-    ${OpenCV_LIBS}
+    ${srpb_logger_LIBRARIES}
+    ${srpb_tooling_LIBRARIES}
+    # FIXME: see note above
+    ${OpenCV_LIBRARIES}
     )
 add_dependencies(move_base_benchmark ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
