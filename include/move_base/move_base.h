@@ -61,6 +61,7 @@
 #include "move_base/MoveBaseConfig.h"
 #include "move_base/obs_dist_calculator.h"
 #include "move_base/robot_logger.h"
+#include "move_base/people_logger.h"
 
 namespace move_base {
   //typedefs to help us out with the action server so that we don't hace to type so much
@@ -240,6 +241,7 @@ namespace move_base {
       //helper to log the navigation data
       ObsDistCalculator obs_dist_calculator_;
       RobotLogger robot_logger_;
+      PeopleLogger people_logger_;
       base_local_planner::OdometryHelperRos odom_helper_;
   };
 };

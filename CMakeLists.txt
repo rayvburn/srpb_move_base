@@ -65,6 +65,7 @@ include_directories(
 add_library(move_base_benchmark
   src/move_base.cpp
   src/obs_dist_calculator.cpp
+  src/people_logger.cpp
 )
 target_link_libraries(move_base_benchmark
     ${Boost_LIBRARIES}

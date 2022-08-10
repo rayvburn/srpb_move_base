@@ -137,6 +137,7 @@ namespace move_base {
 
     //benchmarking
     robot_logger_.init(private_nh);
+    people_logger_.init(private_nh);
 
     //init the odom helper to receive the robot's velocity from odom messages
     odom_helper_.setOdomTopic("odom");
@@ -690,6 +691,7 @@ namespace move_base {
     planning_retries_ = 0;
 
     robot_logger_.start();
+    people_logger_.start();
 
     ros::NodeHandle n;
     while(n.ok())
@@ -795,6 +797,7 @@ namespace move_base {
     }
 
     robot_logger_.finish();
+    people_logger_.finish();
 
     //wake up the planner thread so that it can exit cleanly
     lock.lock();
@@ -935,6 +938,9 @@ namespace move_base {
 
         // save timestamp to variable (used by robot navigation and social perception data)
         auto benchmark_update_ts = ros::Time::now().toSec();
+
+        // log the newest state of social perception
+        people_logger_.update(benchmark_update_ts);
 
         //start timing
         const auto start_t = std::chrono::high_resolution_clock::now();
