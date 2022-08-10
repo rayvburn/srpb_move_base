@@ -36,6 +36,10 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_package(
+    INCLUDE_DIRS
+        include
+    LIBRARIES
+        move_base_benchmark
     CATKIN_DEPENDS
         dynamic_reconfigure
         geometry_msgs
