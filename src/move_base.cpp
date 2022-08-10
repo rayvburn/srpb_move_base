@@ -933,8 +933,8 @@ namespace move_base {
         //compute the distance to the closest obstacle
         double obs_dist = obs_dist_calculator_.compute(controller_costmap_ros_);
 
-        //log navigation data
-        robot_logger_.update(ros::WallTime::now().toSec(), robot_pose, robot_vel_tf, obs_dist);
+        // save timestamp to variable (used by robot navigation and social perception data)
+        auto benchmark_update_ts = ros::Time::now().toSec();
 
         //start timing
         const auto start_t = std::chrono::high_resolution_clock::now();
@@ -977,7 +977,8 @@ namespace move_base {
         //end timing
         const auto end_t = std::chrono::high_resolution_clock::now();
         const std::chrono::duration<double> time_diff = end_t - start_t;
-        robot_logger_.update(time_diff.count());
+        // log robot navigation data
+        robot_logger_.update(benchmark_update_ts, RobotData(robot_pose, robot_vel_tf, obs_dist, time_diff.count()));
         }
 
         break;

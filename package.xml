@@ -30,6 +30,8 @@
     <depend>move_base_msgs</depend>
     <depend>nav_core</depend>
     <depend>nav_msgs</depend>
+    <depend>people_msgs</depend>
+    <depend>people_msgs_utils</depend>
     <depend>pluginlib</depend>
     <depend>roscpp</depend>
     <depend>rospy</depend>

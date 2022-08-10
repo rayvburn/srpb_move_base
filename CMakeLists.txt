@@ -15,6 +15,8 @@ find_package(catkin REQUIRED
         nav_core
         nav_msgs
         navfn
+        people_msgs
+        people_msgs_utils
         pluginlib
         roscpp
         rospy
@@ -45,6 +47,8 @@ catkin_package(
         geometry_msgs
         move_base_msgs
         nav_msgs
+        people_msgs
+        people_msgs_utils
         roscpp
 )
 
@@ -54,6 +58,7 @@ include_directories(
     ${EIGEN3_INCLUDE_DIRS}
     ${CERES_INCLUDE_DIRS}
     ${OpenCV_INCLUDE_DIRS}
+    ${people_msgs_utils_INCLUDE_DIRS}
 )
 
 # move_base
@@ -66,6 +71,7 @@ target_link_libraries(move_base_benchmark
     ${catkin_LIBRARIES}
     ${CERES_LIBRARIES}
     ${OpenCV_LIBS}
+    ${people_msgs_utils_LIBRARIES}
     )
 add_dependencies(move_base_benchmark ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
