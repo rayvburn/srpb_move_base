@@ -984,7 +984,16 @@ namespace move_base {
         const auto end_t = std::chrono::high_resolution_clock::now();
         const std::chrono::duration<double> time_diff = end_t - start_t;
         // log robot navigation data
-        robot_logger_.update(benchmark_update_ts, RobotData(robot_pose, robot_vel_tf, obs_dist, time_diff.count()));
+        robot_logger_.update(
+          benchmark_update_ts,
+          RobotData(
+            robot_pose,
+            robot_vel_tf,
+            planner_goal_,
+            obs_dist,
+            time_diff.count()
+          )
+        );
         }
 
         break;
