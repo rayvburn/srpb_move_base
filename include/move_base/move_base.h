@@ -240,9 +240,9 @@ namespace move_base {
       bool new_global_plan_;
 
       //helper to log the navigation data
-      ObsDistCalculator obs_dist_calculator_;
-      RobotLogger robot_logger_;
-      PeopleLogger people_logger_;
+      srpb::tooling::ObsDistCalculator obs_dist_calculator_;
+      srpb::logger::RobotLogger robot_logger_;
+      srpb::logger::PeopleLogger people_logger_;
       base_local_planner::OdometryHelperRos odom_helper_;
   };
 };

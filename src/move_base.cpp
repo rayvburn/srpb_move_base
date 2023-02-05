@@ -986,7 +986,7 @@ namespace move_base {
         // log robot navigation data
         robot_logger_.update(
           benchmark_update_ts,
-          RobotData(
+          srpb::logger::RobotData(
             robot_pose,
             robot_vel_tf,
             planner_goal_,
