@@ -28,19 +28,6 @@ find_package(catkin REQUIRED
 find_package(Eigen3 REQUIRED)
 add_definitions(${EIGEN3_DEFINITIONS})
 
-# FIXME::
-# OpenCV dependency is inherited from `srpb_tooling` package however there is some linking issue. Error is:
-#
-# Errors     << srpb_move_base:make <WS>/logs/srpb_move_base/build.make.034.log
-# /usr/bin/ld: CMakeFiles/srpb_move_base_node.dir/src/move_base_node.cpp.o: undefined reference to symbol
-# '_ZN2cv6String10deallocateEv'
-# /usr/lib/x86_64-linux-gnu/libopencv_core.so.3.2: error adding symbols: DSO missing from command line
-# collect2: error: ld returned 1 exit status
-#
-# ${srpb_tooling_LIBRARIES} does not show `opencv` libraries indeed
-#
-find_package(OpenCV REQUIRED)
-
 # dynamic reconfigure
 generate_dynamic_reconfigure_options(
     cfg/MoveBase.cfg
@@ -78,8 +65,6 @@ target_link_libraries(${PROJECT_NAME}
     ${catkin_LIBRARIES}
     ${srpb_logger_LIBRARIES}
     ${srpb_tooling_LIBRARIES}
-    # FIXME: see note above
-    ${OpenCV_LIBRARIES}
     )
 add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
