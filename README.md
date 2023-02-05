@@ -1,4 +1,4 @@
-# move_base_benchmark
+# srpb_move_base
 
 Package developed on top of:
 
@@ -19,7 +19,7 @@ cd <REPO>
 for i in $(git branch -r | sed "s/.*origin\///"); do git branch -t $i origin/$i; done
 git filter-branch --prune-empty --subdirectory-filter move_base -- --all
 git remote remove origin
-git remote add origin git@github.com:rayvburn/move_base_benchmark.git
+git remote add origin git@github.com:rayvburn/srpb_move_base.git
 git push origin '*:*'
 git push origin --all
 git push origin --tags

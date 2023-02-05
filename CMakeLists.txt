@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(move_base_benchmark)
+project(srpb_move_base)
 
 find_package(catkin REQUIRED
     COMPONENTS
@@ -31,8 +31,8 @@ add_definitions(${EIGEN3_DEFINITIONS})
 # FIXME::
 # OpenCV dependency is inherited from `srpb_tooling` package however there is some linking issue. Error is:
 #
-# Errors     << move_base_benchmark:make <WS>/logs/move_base_benchmark/build.make.034.log
-# /usr/bin/ld: CMakeFiles/move_base_benchmark_node.dir/src/move_base_node.cpp.o: undefined reference to symbol
+# Errors     << srpb_move_base:make <WS>/logs/srpb_move_base/build.make.034.log
+# /usr/bin/ld: CMakeFiles/srpb_move_base_node.dir/src/move_base_node.cpp.o: undefined reference to symbol
 # '_ZN2cv6String10deallocateEv'
 # /usr/lib/x86_64-linux-gnu/libopencv_core.so.3.2: error adding symbols: DSO missing from command line
 # collect2: error: ld returned 1 exit status
@@ -50,7 +50,7 @@ catkin_package(
     INCLUDE_DIRS
         include
     LIBRARIES
-        move_base_benchmark
+        ${PROJECT_NAME}
     CATKIN_DEPENDS
         dynamic_reconfigure
         geometry_msgs
@@ -70,10 +70,10 @@ include_directories(
 )
 
 # move_base
-add_library(move_base_benchmark
+add_library(${PROJECT_NAME}
   src/move_base.cpp
 )
-target_link_libraries(move_base_benchmark
+target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
     ${srpb_logger_LIBRARIES}
@@ -81,24 +81,24 @@ target_link_libraries(move_base_benchmark
     # FIXME: see note above
     ${OpenCV_LIBRARIES}
     )
-add_dependencies(move_base_benchmark ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(move_base_benchmark_node
+add_executable(${PROJECT_NAME}_node
   src/move_base_node.cpp
 )
-add_dependencies(move_base_benchmark_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(move_base_benchmark_node move_base_benchmark)
-set_target_properties(move_base_benchmark_node PROPERTIES OUTPUT_NAME move_base_benchmark)
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME})
+set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 
 install(
     TARGETS
-        move_base_benchmark_node
+        ${PROJECT_NAME}_node
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(
     TARGETS
-        move_base_benchmark
+        ${PROJECT_NAME}
     DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 
