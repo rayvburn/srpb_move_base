@@ -100,3 +100,12 @@ install(DIRECTORY include/${PROJECT_NAME}/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
   FILES_MATCHING PATTERN "*.h"
 )
+
+## Testing
+# catkin run_tests --no-deps move_base_benchmark --verbose
+if (CATKIN_ENABLE_TESTING)
+  catkin_add_gtest(test_people_logger test/test_people_logger.cpp)
+  if(TARGET test_people_logger)
+    target_link_libraries(test_people_logger move_base_benchmark)
+  endif()
+endif()
