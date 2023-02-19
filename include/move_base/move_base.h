@@ -57,7 +57,6 @@
 #include <std_srvs/Empty.h>
 
 #include <dynamic_reconfigure/server.h>
-#include <base_local_planner/odometry_helper_ros.h>
 #include "move_base/MoveBaseConfig.h"
 
 #include <srpb_tooling/obs_dist_calculator.h>
@@ -243,7 +242,6 @@ namespace move_base {
       srpb::tooling::ObsDistCalculator obs_dist_calculator_;
       srpb::logger::RobotLogger robot_logger_;
       srpb::logger::PeopleLogger people_logger_;
-      base_local_planner::OdometryHelperRos odom_helper_;
   };
 };
 #endif

@@ -139,9 +139,6 @@ namespace move_base {
     robot_logger_.init(private_nh);
     people_logger_.init(private_nh);
 
-    //init the odom helper to receive the robot's velocity from odom messages
-    odom_helper_.setOdomTopic("odom");
-
     //create a local planner
     try {
       tc_ = blp_loader_.createInstance(local_planner);
@@ -925,14 +922,6 @@ namespace move_base {
         {
          boost::unique_lock<costmap_2d::Costmap2D::mutex_t> lock(*(controller_costmap_ros_->getCostmap()->getMutex()));
 
-        //get robot pose
-        geometry_msgs::PoseStamped robot_pose;
-        getRobotPose(robot_pose, controller_costmap_ros_);
-
-        //get robot velocity
-        geometry_msgs::PoseStamped robot_vel_tf;
-        odom_helper_.getRobotVel(robot_vel_tf);
-
         //compute the distance to the closest obstacle
         double obs_dist = obs_dist_calculator_.compute(controller_costmap_ros_);
 
@@ -987,8 +976,6 @@ namespace move_base {
         robot_logger_.update(
           benchmark_update_ts,
           srpb::logger::RobotData(
-            robot_pose,
-            robot_vel_tf,
             planner_goal_,
             obs_dist,
             time_diff.count()
