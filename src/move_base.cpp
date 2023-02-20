@@ -976,7 +976,7 @@ namespace move_base {
         robot_logger_.update(
           benchmark_update_ts,
           srpb::logger::RobotData(
-            planner_goal_,
+            robot_logger_.transformPose(planner_goal_),
             obs_dist,
             time_diff.count()
           )
