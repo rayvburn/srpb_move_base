@@ -932,7 +932,7 @@ namespace move_base {
         people_logger_.update(benchmark_update_ts);
 
         //start timing
-        const auto start_t = std::chrono::high_resolution_clock::now();
+        const auto start_t = ros::Time::now();
 
         if(tc_->computeVelocityCommands(cmd_vel)){
           ROS_DEBUG_NAMED( "move_base", "Got a valid command from the local planner: %.3lf, %.3lf, %.3lf",
@@ -970,15 +970,15 @@ namespace move_base {
         }
 
         //end timing
-        const auto end_t = std::chrono::high_resolution_clock::now();
-        const std::chrono::duration<double> time_diff = end_t - start_t;
+        const auto end_t = ros::Time::now();
+        const auto time_diff = (end_t - start_t).toSec();
         // log robot navigation data
         robot_logger_.update(
           benchmark_update_ts,
           srpb::logger::RobotData(
             robot_logger_.transformPose(planner_goal_),
             obs_dist,
-            time_diff.count()
+            time_diff
           )
         );
         }
