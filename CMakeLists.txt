@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(move_base)
+cmake_minimum_required(VERSION 3.0.2)
+project(srpb_move_base)
 
 find_package(catkin REQUIRED
     COMPONENTS
@@ -22,6 +22,8 @@ find_package(catkin REQUIRED
         std_srvs
         tf2_geometry_msgs
         tf2_ros
+        srpb_logger
+        srpb_tooling
 )
 find_package(Eigen3 REQUIRED)
 add_definitions(${EIGEN3_DEFINITIONS})
@@ -32,46 +34,56 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_package(
+    INCLUDE_DIRS
+        include
+    LIBRARIES
+        ${PROJECT_NAME}
     CATKIN_DEPENDS
         dynamic_reconfigure
         geometry_msgs
         move_base_msgs
         nav_msgs
         roscpp
+        srpb_logger
+        srpb_tooling
 )
 
 include_directories(
     include
     ${catkin_INCLUDE_DIRS}
     ${EIGEN3_INCLUDE_DIRS}
+    ${srpb_logger_INCLUDE_DIRS}
+    ${srpb_tooling_INCLUDE_DIRS}
 )
 
 # move_base
-add_library(move_base
+add_library(${PROJECT_NAME}
   src/move_base.cpp
 )
-target_link_libraries(move_base
+target_link_libraries(${PROJECT_NAME}
     ${Boost_LIBRARIES}
     ${catkin_LIBRARIES}
+    ${srpb_logger_LIBRARIES}
+    ${srpb_tooling_LIBRARIES}
     )
-add_dependencies(move_base ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_executable(move_base_node
+add_executable(${PROJECT_NAME}_node
   src/move_base_node.cpp
 )
-add_dependencies(move_base_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(move_base_node move_base)
-set_target_properties(move_base_node PROPERTIES OUTPUT_NAME move_base)
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME})
+set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
 
 install(
     TARGETS
-        move_base_node
+        ${PROJECT_NAME}_node
     DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
 install(
     TARGETS
-        move_base
+        ${PROJECT_NAME}
     DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
 )
 

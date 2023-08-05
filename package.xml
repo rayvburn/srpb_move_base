@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format2.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="2">
-    <name>move_base</name>
+    <name>srpb_move_base</name>
     <version>1.16.7</version>
     <description>
 
@@ -13,6 +13,7 @@
     <maintainer email="davidvlu@gmail.com">David V. Lu!!</maintainer>
     <maintainer email="mfergs7@gmail.com">Michael Ferguson</maintainer>
     <maintainer email="ahoy@fetchrobotics.com">Aaron Hoy</maintainer>
+    <maintainer email="chromedivizer@gmail.com">Jarosław Karwowski</maintainer>
     <license>BSD</license>
     <url>http://wiki.ros.org/move_base</url>
 
@@ -35,6 +36,9 @@
     <depend>std_srvs</depend>
     <depend>tf2_ros</depend>
     <depend>visualization_msgs</depend>
+
+    <depend>srpb_logger</depend>
+    <depend>srpb_tooling</depend>
 
     <!--These deps aren't strictly needed, but given the default parameters require them to work, we'll enforce that they build -->
     <depend>base_local_planner</depend>

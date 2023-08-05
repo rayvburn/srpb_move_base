@@ -35,9 +35,10 @@
 * Author: Eitan Marder-Eppstein
 *         Mike Phillips (put the planner in its own thread)
 *********************************************************************/
-#include <move_base/move_base.h>
+#include "move_base/move_base.h"
 #include <move_base_msgs/RecoveryStatus.h>
 #include <cmath>
+#include <chrono>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/thread.hpp>
@@ -45,6 +46,7 @@
 #include <geometry_msgs/Twist.h>
 
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2/utils.h>
 
 namespace move_base {
 
@@ -132,6 +134,10 @@ namespace move_base {
     //create the ros wrapper for the controller's costmap... and initializer a pointer we'll use with the underlying map
     controller_costmap_ros_ = new costmap_2d::Costmap2DROS("local_costmap", tf_);
     controller_costmap_ros_->pause();
+
+    //benchmarking
+    robot_logger_.init(private_nh);
+    people_logger_.init(private_nh);
 
     //create a local planner
     try {
@@ -681,6 +687,9 @@ namespace move_base {
     last_oscillation_reset_ = ros::Time::now();
     planning_retries_ = 0;
 
+    robot_logger_.start();
+    people_logger_.start();
+
     ros::NodeHandle n;
     while(n.ok())
     {
@@ -783,6 +792,9 @@ namespace move_base {
       if(r.cycleTime() > ros::Duration(1 / controller_frequency_) && state_ == CONTROLLING)
         ROS_WARN("Control loop missed its desired rate of %.4fHz... the loop actually took %.4f seconds", controller_frequency_, r.cycleTime().toSec());
     }
+
+    robot_logger_.finish();
+    people_logger_.finish();
 
     //wake up the planner thread so that it can exit cleanly
     lock.lock();
@@ -910,6 +922,18 @@ namespace move_base {
         {
          boost::unique_lock<costmap_2d::Costmap2D::mutex_t> lock(*(controller_costmap_ros_->getCostmap()->getMutex()));
 
+        //compute the distance to the closest obstacle
+        double obs_dist = obs_dist_calculator_.compute(controller_costmap_ros_);
+
+        // save timestamp to variable (used by robot navigation and social perception data)
+        auto benchmark_update_ts = ros::Time::now().toSec();
+
+        // log the newest state of social perception
+        people_logger_.update(benchmark_update_ts);
+
+        //start timing
+        const auto start_t = ros::Time::now();
+
         if(tc_->computeVelocityCommands(cmd_vel)){
           ROS_DEBUG_NAMED( "move_base", "Got a valid command from the local planner: %.3lf, %.3lf, %.3lf",
                            cmd_vel.linear.x, cmd_vel.linear.y, cmd_vel.angular.z );
@@ -944,6 +968,19 @@ namespace move_base {
             lock.unlock();
           }
         }
+
+        //end timing
+        const auto end_t = ros::Time::now();
+        const auto time_diff = (end_t - start_t).toSec();
+        // log robot navigation data
+        robot_logger_.update(
+          benchmark_update_ts,
+          srpb::logger::RobotData(
+            robot_logger_.transformPose(planner_goal_),
+            obs_dist,
+            time_diff
+          )
+        );
         }
 
         break;

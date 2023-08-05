@@ -59,6 +59,10 @@
 #include <dynamic_reconfigure/server.h>
 #include "move_base/MoveBaseConfig.h"
 
+#include <srpb_tooling/obs_dist_calculator.h>
+#include <srpb_logger/robot_logger.h>
+#include <srpb_logger/people_logger.h>
+
 namespace move_base {
   //typedefs to help us out with the action server so that we don't hace to type so much
   typedef actionlib::SimpleActionServer<move_base_msgs::MoveBaseAction> MoveBaseActionServer;
@@ -233,6 +237,11 @@ namespace move_base {
       move_base::MoveBaseConfig default_config_;
       bool setup_, p_freq_change_, c_freq_change_;
       bool new_global_plan_;
+
+      //helper to log the navigation data
+      srpb::tooling::ObsDistCalculator obs_dist_calculator_;
+      srpb::logger::RobotLogger robot_logger_;
+      srpb::logger::PeopleLogger people_logger_;
   };
 };
 #endif
