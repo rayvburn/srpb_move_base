@@ -138,6 +138,7 @@ namespace move_base {
     //benchmarking
     robot_logger_.init(private_nh);
     people_logger_.init(private_nh);
+    planner_logger_.init(private_nh);
 
     //create a local planner
     try {
@@ -498,8 +499,28 @@ namespace move_base {
 
     const geometry_msgs::PoseStamped& start = global_pose;
 
+    //start timing
+    const auto start_t = ros::Time::now();
+
     //if the planner fails or returns a zero length plan, planning failed
-    if(!planner_->makePlan(start, goal, plan) || plan.empty()){
+    bool planning_success = planner_->makePlan(start, goal, plan) && !plan.empty();
+
+    //end timing
+    const auto end_t = ros::Time::now();
+    const auto planning_time = (end_t - start_t).toSec();
+
+    planner_logger_.update(
+      start_t.toSec(),
+      srpb::logger::GlobalPlannerData(
+        robot_logger_.transformPose(start),
+        robot_logger_.transformPose(goal),
+        planning_success,
+        planning_time,
+        plan.size()
+      )
+    );
+
+    if (!planning_success) {
       ROS_DEBUG_NAMED("move_base","Failed to find a  plan to point (%.2f, %.2f)", goal.pose.position.x, goal.pose.position.y);
       return false;
     }
@@ -689,6 +710,7 @@ namespace move_base {
 
     robot_logger_.start();
     people_logger_.start();
+    planner_logger_.start();
 
     ros::NodeHandle n;
     while(n.ok())
@@ -795,6 +817,7 @@ namespace move_base {
 
     robot_logger_.finish();
     people_logger_.finish();
+    planner_logger_.finish();
 
     //wake up the planner thread so that it can exit cleanly
     lock.lock();
