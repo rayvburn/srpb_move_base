@@ -930,6 +930,8 @@ namespace move_base {
 
         // log the newest state of social perception
         people_logger_.update(benchmark_update_ts);
+        // planning may take a while - latching will provide the time sync of the people data with the robot data
+        robot_logger_.latch();
 
         //start timing
         const auto start_t = ros::Time::now();
