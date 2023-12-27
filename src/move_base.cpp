@@ -1002,6 +1002,7 @@ namespace move_base {
           benchmark_update_ts,
           srpb::logger::RobotData(
             robot_logger_.transformPose(planner_goal_),
+            cmd_vel,
             obs_dist,
             time_diff
           )
