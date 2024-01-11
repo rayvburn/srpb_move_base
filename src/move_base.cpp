@@ -37,6 +37,8 @@
 *********************************************************************/
 #include "move_base/move_base.h"
 #include <move_base_msgs/RecoveryStatus.h>
+
+#include <algorithm>
 #include <cmath>
 #include <chrono>
 
@@ -509,6 +511,15 @@ namespace move_base {
     const auto end_t = ros::Time::now();
     const auto planning_time = (end_t - start_t).toSec();
 
+    // all loggers must store poses in the same frame; when the global frame is set to "map", this simply copies a plan
+    std::vector<geometry_msgs::PoseStamped> transformed_plan;
+    std::for_each(
+      plan.cbegin(),
+      plan.cend(),
+      [this, &transformed_plan](const auto& pose_orig) {
+        transformed_plan.push_back(robot_logger_.transformPose(pose_orig));
+      }
+    );
     planner_logger_.update(
       start_t.toSec(),
       srpb::logger::GlobalPlannerData(
@@ -516,7 +527,7 @@ namespace move_base {
         robot_logger_.transformPose(goal),
         planning_success,
         planning_time,
-        plan.size()
+        transformed_plan
       )
     );
 
